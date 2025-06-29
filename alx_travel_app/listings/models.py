@@ -5,7 +5,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 # Role and status enums
 USER_ROLES = [('guest', 'Guest'), ('host', 'Host'), ('admin', 'Admin')]
 BOOKING_STATUS = [('pending', 'Pending'), ('confirmed', 'Confirmed'), ('canceled', 'Canceled')]
-PAYMENT_METHODS = [('credit_card', 'Credit Card'), ('paypal', 'PayPal'), ('stripe', 'Stripe')]
+PAYMENT_METHODS = [('credit_card', 'Credit Card'), ('paypal', 'PayPal'), ('stripe', 'Stripe'), ('chapa', 'Chapa')]
+PAYMENT_STATUS = [('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed')]
 
 # Custom User Manager
 class UserManager(BaseUserManager):
@@ -65,7 +66,12 @@ class Payment(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateTimeField(auto_now_add=True)
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='chapa')
+    status = models.CharField(max_length=10, choices=PAYMENT_STATUS, default='pending')
+    transaction_id = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"Payment for {self.booking.booking_id} - {self.status}"
 
 class Review(models.Model):
     review_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
